@@ -157,6 +157,9 @@ ACTION(val,
 ACTION_IMPL(val) {
   GValue *v;
   v = g_hash_table_lookup (vars, self->name);
+  if (!v) {
+    g_error ("value '%s' is undefined", self->name);
+  }
   g_value_init (ret, G_VALUE_TYPE (v));
   g_value_copy (v, ret);
 }
@@ -167,56 +170,87 @@ ACTION_CONSTRUCTOR(val, gchar *name)
 }
 END_ACTION
 
-/* object */
+/* function */
 
-#if 0
+ACTION(function,
+    GSList *params;
+    Action *body;)
 
-typedef struct _Object Object;
-struct _Object {
-  GType type;
-  GList *methods;
-};
-
-void object_impl (Object *obj, GValue *ret)
+ACTION_IMPL(function)
 {
-  GObject *instance;
-  GList *method;
-
-  instance = g_object_new (obj->type, NULL);
-  g_value_init (ret, obj->type);
-  g_value_set_object (ret, instance);
-
-  for (method = obj->methods; method; method=method->next)
-  {
-    GValue unused = { 0 };
-    Action *a = method->data;
-    DO(a, &unused);
-  }
+  g_value_init (ret, G_TYPE_POINTER);
+  g_value_set_pointer (ret, self);
 }
 
-Action *object(GType type, ...)
+ACTION_CONSTRUCTOR(function, int dummy, ...)
 {
   va_list l;
-  Object *ret;
+  gchar *arg;
+
+  self->params = NULL;
+
+  va_start (l, dummy);
+  arg = va_arg (l, gchar *);
+  while (arg) {
+    self->params = g_slist_prepend (self->params, arg);
+    arg = va_arg (l, gchar *);
+  }
+  va_end(l);
+
+  /* chop the last argument, it's the body */
+  self->body = (Action *) self->params->data;
+  self->params->data = NULL;
+  /* FIXME: this leaks the first list node */
+  self->params = g_slist_delete_link (self->params, self->params);
+}
+END_ACTION
+
+ACTION(apply,
+    GSList *params;
+    Action *code;)
+
+ACTION_IMPL(apply)
+{
+  GValue f = { 0 };
+  GSList *name, *value;
+
+  function_struct *code;
+
+  DO(self->code, &f);
+  code = g_value_get_pointer (&f);
+
+  /* TODO: push / pop stack frame */
+
+  for (name = code->params, value = self->params; name && value; name =
+      name->next, value = value->next)
+  {
+    GValue *v = g_new0(GValue, 1);
+    DO(((Action *) value->data), v);
+    g_hash_table_replace (vars, name->data, v);
+  }
+
+  if (name || value)
+  {
+    g_error ("incorrect number of args");
+  }
+
+  DO(code->body, ret);
+}
+
+ACTION_CONSTRUCTOR (apply, Action *f, ...)
+{
+  va_list l;
   Action *arg;
 
-  ret = g_new0 (Object, 1);
-  ret->parent.do_ = (action_func) object_impl;
-  ret->type = type;
+  self->code = f;
 
-  va_start (l, type);
-
+  va_start (l, f);
   arg = va_arg (l, Action *);
-
   while (arg)
   {
-    ret->methods = g_list_prepend (ret->methods, arg);
+    self->params = g_slist_prepend (self->params, arg);
     arg = va_arg (l, Action *);
   }
   va_end (l);
-
-  ret->methods = g_list_reverse (ret->methods);
-
-  return (Action *) ret;
 }
-#endif
+END_ACTION

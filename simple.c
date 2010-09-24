@@ -12,16 +12,19 @@ int main (int argc, char **argv) {
   BEGIN
       DEF (foo, boolean (TRUE)),
       DEF (bar, _(blah)),
+      DEF (baz, FUNCTION ("x",
+            IF(VAL (x),
+              BLOCK (
+                call (a_function),
+                print (VAL (bar)),
+                _("x is positive")
+              ),
+              _("x is negative")
+            )
+        )
+      ),
 
-      print (VAL (bar)),
-
-      IF (VAL (foo),
-        BLOCK (
-          print (str(static_string)),
-          call (a_function)
-        ),
-
-        print (_(huston, we have a problem))
-      )
+      print (APPLY(baz, VAL(foo))),
+      print (APPLY(baz, boolean (FALSE)))
   END
 }

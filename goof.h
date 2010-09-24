@@ -25,6 +25,9 @@ Action *def (gchar *string, Action *value_expr);
 Action *val (gchar *string);
 Action *boolean (gboolean value);
 Action *str (gchar *value);
+Action *object (GType type, ...);
+Action *function (int dummy, ...);
+Action *apply (Action *f, ...);
 
 /* useful macros */
 
@@ -33,6 +36,8 @@ Action *str (gchar *value);
 #define DEF(name, value) def(#name, value)
 #define VAL(name) val(#name)
 #define _(...) str(#__VA_ARGS__)
+#define FUNCTION(...) function(0, __VA_ARGS__, NULL)
+#define APPLY(f, ...) apply(VAL(f), __VA_ARGS__, NULL)
 
 #define BEGIN {\
     GValue ret = { 0 };\
