@@ -5,9 +5,12 @@
 #include <stdarg.h>
 #include <glib-object.h>
 
+#define ACTION_ARGS Action *self, GValue *ret
+#define CALLBACK(name) static void name (ACTION_ARGS)
+
 typedef struct _Action Action;
 
-typedef void (*action_func) (Action *a, GValue *ret);
+typedef void (*action_func) (ACTION_ARGS);
 
 struct _Action {
   action_func do_;

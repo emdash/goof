@@ -1,7 +1,7 @@
 #include "goof.h"
 #include <gtk/gtk.h>
 
-static void a_function (Action * a, GValue *ret)
+CALLBACK(a_function)
 {
   g_printf ("called a c function\n");
 }
