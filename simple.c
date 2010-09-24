@@ -6,6 +6,8 @@ CALLBACK(a_function)
   g_printf ("called a c function\n");
 }
 
+static gchar *static_string = "foo";
+
 int main (int argc, char **argv) {
   BEGIN
       DEF (foo, boolean (TRUE)),
@@ -15,11 +17,11 @@ int main (int argc, char **argv) {
 
       IF (VAL (foo),
         BLOCK (
-          print (str("foo")),
+          print (str(static_string)),
           call (a_function)
         ),
 
-        print (str("huston, we have a problem"))
+        print (_(huston, we have a problem))
       )
   END
 }

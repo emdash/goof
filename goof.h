@@ -32,7 +32,7 @@ Action *str (gchar *value);
 #define OBJ(...) object(__VA_ARGS__, NULL)
 #define DEF(name, value) def(#name, value)
 #define VAL(name) val(#name)
-#define _(name) str(#name)
+#define _(...) str(#__VA_ARGS__)
 
 #define BEGIN {\
     GValue ret = { 0 };\
