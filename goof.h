@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <glib-object.h>
 
-#define ACTION_ARGS Action *self, GValue *ret
+#define ACTION_ARGS Action *self, GValue *ret, GHashTable *vars
 #define CALLBACK(name) static void name (ACTION_ARGS)
 
 typedef struct _Action Action;
@@ -16,26 +16,35 @@ struct _Action {
   action_func do_;
 };
 
-#define DO(action, ret) action->do_(action, ret)
+#define DO(action, ret) action->do_(action, ret, vars)
 
 Action *block (int dummy, ...);
-Action *print (gchar *arg);
+Action *print (Action *value);
 Action *call (action_func func);
+Action *def (gchar *string, Action *value_expr);
+Action *val (gchar *string);
+Action *boolean (gboolean value);
+Action *str (gchar *value);
 
 /* useful macros */
 
 #define BLOCK(...) block(0,  __VA_ARGS__, NULL)
 #define OBJ(...) object(__VA_ARGS__, NULL)
+#define DEF(name, value) def(#name, value)
+#define VAL(name) val(#name)
+#define _(name) str(#name)
 
 #define BEGIN {\
     GValue ret = { 0 };\
+    GHashTable *vars;\
     Action *x;\
     g_type_init ();\
+    vars = g_hash_table_new (g_str_hash, g_str_equal);\
     x = block(0, 
 
 #define END\
     , NULL);\
-    x->do_(x, &ret);}
+    x->do_(x, &ret, vars);}
 
 #endif
 
@@ -46,7 +55,7 @@ Action *call (action_func func);
   } name##_struct;
 
 #define ACTION_IMPL(name)\
-  static void name##_impl (name##_struct *self, GValue *ret)
+  static void name##_impl (name##_struct *self, GValue *ret, GHashTable *vars)
 
 #define ACTION_CONSTRUCTOR(name, ...)\
   Action *name (__VA_ARGS__) {\

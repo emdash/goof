@@ -12,7 +12,7 @@ Action *call (action_func func)
   return (Action *) ret;
 }
 
-/* expression */
+/* types */
 
 ACTION(boolean, 
     gboolean value;
@@ -27,6 +27,21 @@ ACTION_IMPL(boolean)
 ACTION_CONSTRUCTOR(boolean, gboolean v)
 {
   self->value = v;
+}
+END_ACTION
+
+ACTION(str,
+    gchar *value;)
+
+ACTION_IMPL(str)
+{
+  g_value_init (ret, G_TYPE_STRING);
+  g_value_set_string (ret, self->value);
+}
+
+ACTION_CONSTRUCTOR(str, gchar *value)
+{
+  self->value = value;
 }
 END_ACTION
 
@@ -72,7 +87,7 @@ ACTION_IMPL(block)
   {
     if (G_IS_VALUE (ret))
       g_value_unset (ret);
-    ((Action *) cur->data)->do_((Action *) cur->data, ret);
+    DO(((Action *) cur->data), ret);
   }
 }
 
@@ -96,16 +111,59 @@ END_ACTION
 
 /* print statement */
 ACTION(print,
-  gchar *arg;
+  Action *a;
 )
 
 ACTION_IMPL(print) {
-  g_printf ("%s\n", self->arg);
+  GValue v = { 0 };
+  GValue string = { 0 };
+
+  DO (self->a, &v);
+  g_value_init (&string, G_TYPE_STRING);
+  g_value_transform (&v, &string);
+  g_printf ("%s\n", g_value_get_string (&string));
 }
 
-ACTION_CONSTRUCTOR(print, gchar *s) 
+ACTION_CONSTRUCTOR(print, Action *a) 
 {
-  self->arg = g_strdup (s);
+  self->a = a;
+}
+END_ACTION
+
+/* vars */
+
+ACTION(def,
+  gchar *name;
+  Action *expr;
+  GValue value;)
+
+ACTION_IMPL(def) {
+  DO(self->expr, ret);
+  g_value_init (&self->value, G_VALUE_TYPE (ret));
+  g_value_copy (ret, &self->value);
+  g_hash_table_replace (vars, self->name, &self->value);
+}
+
+ACTION_CONSTRUCTOR(def, gchar *name, Action *value_expr)
+{
+  self->name = name;
+  self->expr = value_expr;
+}
+END_ACTION
+
+ACTION(val,
+    gchar *name;)
+
+ACTION_IMPL(val) {
+  GValue *v;
+  v = g_hash_table_lookup (vars, self->name);
+  g_value_init (ret, G_VALUE_TYPE (v));
+  g_value_copy (v, ret);
+}
+
+ACTION_CONSTRUCTOR(val, gchar *name)
+{
+  self->name = name;
 }
 END_ACTION
 

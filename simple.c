@@ -8,15 +8,18 @@ CALLBACK(a_function)
 
 int main (int argc, char **argv) {
   BEGIN
-      boolean (FALSE),
-      print ("bar"),
-      IF (boolean (TRUE),
+      DEF (foo, boolean (TRUE)),
+      DEF (bar, _(blah)),
+
+      print (VAL (bar)),
+
+      IF (VAL (foo),
         BLOCK (
-          print ("foo"),
-          print ("baz"),
+          print (str("foo")),
           call (a_function)
-          ),
-        print ("huston, we have a problem")
+        ),
+
+        print (str("huston, we have a problem"))
       )
   END
 }
