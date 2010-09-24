@@ -1,5 +1,4 @@
 #include "goof.h"
-#include <gtk/gtk.h>
 
 CALLBACK(a_function)
 {
@@ -32,6 +31,6 @@ int main (int argc, char **argv) {
 
       print (APPLY(baz, VAL(foo))),
       print (APPLY(baz, boolean (FALSE))),
-      print (call (another_function));
+      print (call (another_function))
   END
 }
