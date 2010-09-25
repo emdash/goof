@@ -73,3 +73,25 @@ Action *apply (Action *f, ...);
 #define END_ACTION\
     return (Action *) self;\
   }
+
+#define DEFINE_TYPE(goof_name, c_name, gtype_particle, gtype)\
+ACTION(goof_name, \
+    c_name value;\
+)\
+\
+ACTION_IMPL(goof_name)\
+{\
+  g_value_init (ret, gtype);\
+  g_value_set_##gtype_particle (ret, self->value);\
+}\
+\
+ACTION_CONSTRUCTOR(goof_name, c_name value)
+
+#define END_TYPE END_ACTION
+
+#define DEFINE_MACHINE_TYPE(goof_name, c_name, particle, gtype)\
+  DEFINE_TYPE(goof_name, c_name, particle, gtype)\
+  {\
+    self->value = value;\
+  }\
+  END_TYPE
