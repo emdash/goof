@@ -29,6 +29,17 @@ int main (int argc, char **argv) {
         )
       ),
 
+      print (plus (integer (3), integer(4))),
+
+      DEF (+, FUNCTION ("x", "y",
+            plus (VAL(x), VAL(y)))),
+
+      print (APPLY(+, _(abc), _(def))),
+      print (APPLY(+, integer (3), real (2.4))),
+
+      print (_(test negation)),
+      print (not (boolean (FALSE))),
+
       print (APPLY(baz, VAL(foo))),
       print (APPLY(baz, boolean (FALSE))),
       print (call (another_function)),

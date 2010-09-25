@@ -35,6 +35,9 @@ Action *object (GType type, ...);
 Action *function (int dummy, ...);
 Action *apply (Action *f, ...);
 
+Action *not (Action *f);
+Action *plus (Action *r, Action *l);
+
 /* useful macros */
 
 #define BLOCK(...) block(0,  __VA_ARGS__, NULL)
@@ -76,7 +79,8 @@ Action *apply (Action *f, ...);
 
 #define END_ACTION\
     return (Action *) self;\
-  }
+  }\
+
 
 #define DEFINE_TYPE(goof_name, c_name, gtype_particle, gtype)\
 ACTION(goof_name, \
@@ -93,9 +97,3 @@ ACTION_CONSTRUCTOR(goof_name, c_name value)
 
 #define END_TYPE END_ACTION
 
-#define DEFINE_MACHINE_TYPE(goof_name, c_name, particle, gtype)\
-  DEFINE_TYPE(goof_name, c_name, particle, gtype)\
-  {\
-    self->value = value;\
-  }\
-  END_TYPE

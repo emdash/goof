@@ -14,6 +14,13 @@ Action *call (action_func func)
 
 /* types */
 
+#define DEFINE_MACHINE_TYPE(goof_name, c_name, particle, gtype)\
+  DEFINE_TYPE(goof_name, c_name, particle, gtype)\
+  {\
+    self->value = value;\
+  }\
+  END_TYPE
+
 DEFINE_MACHINE_TYPE(boolean, gboolean, boolean, G_TYPE_BOOLEAN)
 DEFINE_MACHINE_TYPE(integer, gint, int, G_TYPE_INT)
 DEFINE_MACHINE_TYPE(real, gdouble, double, G_TYPE_DOUBLE)
@@ -25,6 +32,108 @@ DEFINE_TYPE(str, gchar *, string, G_TYPE_STRING)
   self->value = g_strdup(value);
 }
 END_TYPE
+
+/* unary operators */
+
+ACTION(not,
+  Action *arg;
+)
+
+ACTION_IMPL(not)
+{
+  GValue result = { 0 };
+  DO(self->arg, &result);
+  g_value_init (ret, G_TYPE_BOOLEAN);
+  g_value_transform (&result, ret);
+  g_value_set_boolean (ret, ! g_value_get_boolean (ret));
+}
+
+ACTION_CONSTRUCTOR(not, Action *arg)
+{
+  self->arg = arg;
+}
+END_ACTION
+
+/* binary operators */
+
+ACTION(plus,
+    Action *l;
+    Action *r;
+)
+
+static promote (GType l, GType r) {
+
+  if ((l == G_TYPE_DOUBLE) || (r == G_TYPE_DOUBLE))
+    return G_TYPE_DOUBLE;
+
+  if ((l == G_TYPE_INT64) || (r == G_TYPE_INT64))
+    return G_TYPE_INT64;
+
+  if ((l == G_TYPE_UINT64) || (r == G_TYPE_UINT64))
+    return G_TYPE_UINT64;
+
+  if ((l == G_TYPE_INT) && (r == G_TYPE_INT))
+    return G_TYPE_INT;
+
+  if ((l == G_TYPE_STRING) && (r == G_TYPE_STRING))
+    return G_TYPE_STRING;
+
+  return G_TYPE_INVALID;
+}
+
+ACTION_IMPL(plus)
+{
+  GValue l = { 0 };
+  GValue r = { 0 };
+  GValue temp = { 0 };
+  GType t, rt, lt;
+
+  DO(self->l, &l);
+  DO(self->r, &r);
+
+  lt = G_VALUE_TYPE(&l);
+  rt = G_VALUE_TYPE(&r);
+
+  if ((t = promote (lt, rt)) == G_TYPE_INVALID) 
+    g_error ("incompatible types for operation 'plus' (%s, %s)",
+        g_type_name (lt), g_type_name (rt));
+
+  g_value_init (ret, t);
+  g_value_init (&temp, t);
+  g_value_transform (&l, ret);
+  g_value_transform (&r, &temp);
+
+  switch (t) {
+    case G_TYPE_INT:
+      g_value_set_int (ret, 
+          g_value_get_int (ret) + g_value_get_int (&temp));
+      break;
+    case G_TYPE_DOUBLE:
+      g_value_set_double (ret, 
+          g_value_get_double (ret) + g_value_get_double (&temp));
+      break;
+    case G_TYPE_UINT64:
+      g_value_set_uint64 (ret, 
+          g_value_get_uint64 (ret) + g_value_get_uint64 (&temp));
+      break;
+    case G_TYPE_INT64:
+      g_value_set_int64 (ret, 
+          g_value_get_int64 (ret) + g_value_get_int64 (&temp));
+      break;
+    case G_TYPE_STRING:
+      g_value_set_string (ret,
+          g_strdup_printf ("%s%s", g_value_get_string (ret),
+            g_value_get_string (&temp)));
+      break;
+  };
+}
+
+ACTION_CONSTRUCTOR(plus, Action *l, Action *r)
+{
+  self->r = r;
+  self->l = l;
+}
+END_ACTION
 
 /* if */
 
