@@ -41,7 +41,7 @@ ACTION_IMPL(str)
 
 ACTION_CONSTRUCTOR(str, gchar *value)
 {
-  self->value = value;
+  self->value = g_strdup(value);
 }
 END_ACTION
 
