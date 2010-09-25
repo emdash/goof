@@ -4,8 +4,9 @@
 #include <glib.h>
 #include <stdarg.h>
 #include <glib-object.h>
+#include "frame.h"
 
-#define ACTION_ARGS Action *self, GValue *ret, GHashTable *vars
+#define ACTION_ARGS Action *self, GValue *ret, Frame *vars
 #define CALLBACK(name) static void name (ACTION_ARGS)
 
 typedef struct _Action Action;
@@ -41,10 +42,10 @@ Action *apply (Action *f, ...);
 
 #define BEGIN {\
     GValue ret = { 0 };\
-    GHashTable *vars;\
+    Frame *vars;\
     Action *x;\
     g_type_init ();\
-    vars = g_hash_table_new (g_str_hash, g_str_equal);\
+    vars = frame_new (NULL);\
     x = block(0, 
 
 #define END\
@@ -60,7 +61,7 @@ Action *apply (Action *f, ...);
   } name##_struct;
 
 #define ACTION_IMPL(name)\
-  static void name##_impl (name##_struct *self, GValue *ret, GHashTable *vars)
+  static void name##_impl (name##_struct *self, GValue *ret, Frame *vars)
 
 #define ACTION_CONSTRUCTOR(name, ...)\
   Action *name (__VA_ARGS__) {\

@@ -135,13 +135,11 @@ END_ACTION
 ACTION(def,
   gchar *name;
   Action *expr;
-  GValue value;)
+)
 
 ACTION_IMPL(def) {
   DO(self->expr, ret);
-  g_value_init (&self->value, G_VALUE_TYPE (ret));
-  g_value_copy (ret, &self->value);
-  g_hash_table_replace (vars, self->name, &self->value);
+  frame_set_local (vars, self->name, ret);
 }
 
 ACTION_CONSTRUCTOR(def, gchar *name, Action *value_expr)
@@ -156,7 +154,7 @@ ACTION(val,
 
 ACTION_IMPL(val) {
   GValue *v;
-  v = g_hash_table_lookup (vars, self->name);
+  v = frame_get_value (vars, self->name);
   if (!v) {
     g_error ("value '%s' is undefined", self->name);
   }
@@ -226,7 +224,7 @@ ACTION_IMPL(apply)
   {
     GValue *v = g_new0(GValue, 1);
     DO(((Action *) value->data), v);
-    g_hash_table_replace (vars, name->data, v);
+    frame_set_local (vars, name->data, v);
   }
 
   if (name || value)
