@@ -20,6 +20,8 @@ Frame *frame_new (Frame *parent)
   ret = g_new0 (Frame, 1);
   ret->parent = parent;
   ret->symbols = g_hash_table_new (g_str_hash, g_str_equal);
+
+  return ret;
 }
 
 /* creates a local instance of value */
