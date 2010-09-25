@@ -1,0 +1,38 @@
+Copyright (C) 2010 Brandon Lewis
+
+    Introduction
+
+Goof is an experimental functional language with a novel implementation. It is
+a library of functions and macros which combine to create the illusion that
+you are writing in a high-level language. Despite this, goof programs are C
+programs. They are compiled and executed like any other.
+
+Don't be fooled into thinking it's efficient: Goof is essentially a dynamic
+language, with the runtime implemented directly in C.
+
+Goof programs are expressed as nested calls to functions and macros. Each
+function returns a pointer to an object which implements a language contruct. 
+
+    Known Downsides (or, "Why in God's name are you doing this?")
+
+- I just wrote it over the weekend for fun
+- No memory management at present
+- No data types or operations are possible at present
+- I am largely ignorant of how concurrency might affect this system
+
+    Potential Upsides
+
+Though I acknowledge that this is really a pretty terrible thing to do to an
+unsuspecting C programmer, I feel that there might be certain useful features
+of this approach that are worth exploring. In addition to the well-known
+advantages of functional programming, goof might offer the following:
+
+- educational value
+- small implementation
+- easy to add new constructs to the language
+- easy to inter-operate between C and goof
+- requires nothing other than a C compiler (after removing the glib code)
+
+    Liscence
+
+Goof is available under LGPL v3
