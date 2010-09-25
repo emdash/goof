@@ -71,4 +71,3 @@ Action *apply (Action *f, ...);
 #define END_ACTION\
     return (Action *) self;\
   }
-

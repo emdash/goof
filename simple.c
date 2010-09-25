@@ -22,9 +22,9 @@ int main (int argc, char **argv) {
               BLOCK (
                 call (a_function),
                 print (VAL (bar)),
-                _("x is positive")
+                _(x is positive)
               ),
-              _("x is negative")
+              _(x is negative)
             )
         )
       ),
