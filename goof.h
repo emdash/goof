@@ -18,6 +18,7 @@ struct _Action {
 };
 
 #define DO(action, ret) action->do_(action, ret, vars)
+#define DO_WITH(action, ret, vars) action->do_(action, ret, vars)
 
 Action *block (int dummy, ...);
 Action *print (Action *value);

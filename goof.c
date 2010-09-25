@@ -172,12 +172,26 @@ END_ACTION
 
 ACTION(function,
     GSList *params;
-    Action *body;)
+    Action *body;
+)
+
+typedef struct {
+  function_struct *f;
+  Frame *vars;
+} closure;
+
+static closure *closure_new(function_struct *f, Frame *v){
+  closure *ret = g_new0 (closure, 1);
+  ret->f = f;
+  ret->vars = frame_new(v);
+
+  return ret;
+}
 
 ACTION_IMPL(function)
 {
   g_value_init (ret, G_TYPE_POINTER);
-  g_value_set_pointer (ret, self);
+  g_value_set_pointer (ret, closure_new (self, vars));
 }
 
 ACTION_CONSTRUCTOR(function, int dummy, ...)
@@ -211,20 +225,26 @@ ACTION_IMPL(apply)
 {
   GValue f = { 0 };
   GSList *name, *value;
-
+  Frame *frame;
+  closure *c;
   function_struct *code;
 
   DO(self->code, &f);
-  code = g_value_get_pointer (&f);
 
-  /* TODO: push / pop stack frame */
+  /* FIXME: notice this leaks a frame, but what are you going to do? without
+   * ref-counting it's impossible to know when a frame can be freed. a closure
+   * could escape and need this frame later. */
+
+  c = g_value_get_pointer (&f);
+  code = c->f;
+  frame = frame_new(c->vars);
 
   for (name = code->params, value = self->params; name && value; name =
       name->next, value = value->next)
   {
     GValue *v = g_new0(GValue, 1);
     DO(((Action *) value->data), v);
-    frame_set_local (vars, name->data, v);
+    frame_set_local (frame, name->data, v);
   }
 
   if (name || value)
@@ -232,7 +252,7 @@ ACTION_IMPL(apply)
     g_error ("incorrect number of args");
   }
 
-  DO(code->body, ret);
+  DO_WITH(code->body, ret, frame);
 }
 
 ACTION_CONSTRUCTOR (apply, Action *f, ...)
