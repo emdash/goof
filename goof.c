@@ -14,36 +14,17 @@ Action *call (action_func func)
 
 /* types */
 
-ACTION(boolean, 
-    gboolean value;
-)
+DEFINE_MACHINE_TYPE(boolean, gboolean, boolean, G_TYPE_BOOLEAN)
+DEFINE_MACHINE_TYPE(integer, gint, int, G_TYPE_INT)
+DEFINE_MACHINE_TYPE(real, gdouble, double, G_TYPE_DOUBLE)
+DEFINE_MACHINE_TYPE(big, gint64, int64, G_TYPE_INT64)
+DEFINE_MACHINE_TYPE(ubig, guint64, uint64, G_TYPE_UINT64)
 
-ACTION_IMPL(boolean)
-{
-  g_value_init (ret, G_TYPE_BOOLEAN);
-  g_value_set_boolean (ret, self->value);
-}
-
-ACTION_CONSTRUCTOR(boolean, gboolean v)
-{
-  self->value = v;
-}
-END_ACTION
-
-ACTION(str,
-    gchar *value;)
-
-ACTION_IMPL(str)
-{
-  g_value_init (ret, G_TYPE_STRING);
-  g_value_set_string (ret, self->value);
-}
-
-ACTION_CONSTRUCTOR(str, gchar *value)
+DEFINE_TYPE(str, gchar *, string, G_TYPE_STRING)
 {
   self->value = g_strdup(value);
 }
-END_ACTION
+END_TYPE
 
 /* if */
 
