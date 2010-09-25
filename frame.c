@@ -87,3 +87,24 @@ GValue *frame_get_local (Frame *frame, gchar *name)
 
   return g_hash_table_lookup (frame->symbols, name);
 }
+
+static void print_entry (gchar *key, GValue *value, void *unused) {
+  GValue v = { 0 };
+  g_value_init (&v, G_TYPE_STRING);
+  g_value_transform (value, &v);
+
+  g_printf ("   %s = %s\n", key, g_value_get_string (&v));
+
+  g_value_unset (&v);
+}
+
+void frame_dump_stack (Frame *frame)
+{
+  if (frame->parent) {
+    frame_dump_stack (frame->parent);
+    g_printf ("\n");
+  }
+
+  g_printf ("<frame at %p>\n", frame);
+  g_hash_table_foreach (frame->symbols, (GHFunc) print_entry, NULL);
+}
