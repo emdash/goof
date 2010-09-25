@@ -31,6 +31,16 @@ int main (int argc, char **argv) {
 
       print (APPLY(baz, VAL(foo))),
       print (APPLY(baz, boolean (FALSE))),
-      print (call (another_function))
+      print (call (another_function)),
+
+      /* test closures */
+
+      DEF (outer, FUNCTION("x",
+        FUNCTION("ignored", VAL(x)))),
+      DEF (one_ret, APPLY(outer, _(1))),
+
+      DEF (two_ret, APPLY(outer, _(2))),
+      print (APPLY (one_ret, _())),
+      print (APPLY (two_ret, _()))
   END
 }
