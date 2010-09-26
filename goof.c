@@ -177,8 +177,14 @@ ACTION(IF,
 ACTION_IMPL(IF)
 {
   GValue cond = { 0 };
+  GValue conv = { 0 };
+
   DO(self->condition, &cond);
-  if (g_value_get_boolean (&cond))
+
+  g_value_init (&conv, G_TYPE_BOOLEAN);
+  g_value_transform (&cond, &conv);
+
+  if (g_value_get_boolean (&conv))
   {
     DO(self->positive, ret);
   } else
