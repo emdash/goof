@@ -83,66 +83,79 @@ static promote (GType l, GType r) {
           operator g_value_get_##particle (&temp)));\
    break;
 
-#define OP(gtype) \
+#define EVAL_TYPE(gtype) \
   case gtype: {\
 
-#define ENDOP\
+#define END_EVAL_TYPE\
   }\
   break;
 
-#define OP_INTERNAL(operator, ...)\
-  switch (t) {\
+#define NUMERIC_TYPES(operator)\
     INFIX_OP(G_TYPE_INT, int, operator)\
     INFIX_OP(G_TYPE_DOUBLE, double, operator)\
     INFIX_OP(G_TYPE_UINT64, uint64, operator)\
     INFIX_OP(G_TYPE_INT64, int64, operator)\
-    __VA_ARGS__\
-  };
 
+#define BINARY_OP(name, promote)\
+ACTION(name,\
+    Action *l;\
+    Action *r;\
+)\
+\
+ACTION_IMPL(name)\
+{\
+  GValue l = { 0 };\
+  GValue r = { 0 };\
+  GValue temp = { 0 };\
+  GType t, rt, lt;\
+\
+  DO(self->l, &l);\
+  DO(self->r, &r);\
+\
+  lt = G_VALUE_TYPE(&l);\
+  rt = G_VALUE_TYPE(&r);\
+\
+  if ((t = promote (lt, rt)) == G_TYPE_INVALID) \
+    g_error ("incompatible types for operation 'plus' (%s, %s)",\
+        g_type_name (lt), g_type_name (rt));\
+\
+  g_value_init (ret, t);\
+  g_value_init (&temp, t);\
+  g_value_transform (&l, ret);\
+  g_value_transform (&r, &temp);\
+\
+  switch (t) {
+\
 
-ACTION(plus,
-    Action *l;
-    Action *r;
-)
-
-ACTION_IMPL(plus)
-{
-  GValue l = { 0 };
-  GValue r = { 0 };
-  GValue temp = { 0 };
-  GType t, rt, lt;
-
-  DO(self->l, &l);
-  DO(self->r, &r);
-
-  lt = G_VALUE_TYPE(&l);
-  rt = G_VALUE_TYPE(&r);
-
-  if ((t = promote (lt, rt)) == G_TYPE_INVALID) 
-    g_error ("incompatible types for operation 'plus' (%s, %s)",
-        g_type_name (lt), g_type_name (rt));
-
-  g_value_init (ret, t);
-  g_value_init (&temp, t);
-  g_value_transform (&l, ret);
-  g_value_transform (&r, &temp);
-
-  OP_INTERNAL (+,
-      OP(G_TYPE_STRING)
-        const gchar *l, *r;
-        l = g_value_get_string (ret);
-        r = g_value_get_string (&temp);
-        g_value_set_string (ret, g_strconcat (l, r, NULL));
-      ENDOP
-  )
-}
-
-ACTION_CONSTRUCTOR(plus, Action *l, Action *r)
-{
-  self->r = r;
-  self->l = l;
-}
+#define END_BINARY_OP(name) }}\
+ACTION_CONSTRUCTOR(name, Action *l, Action *r)\
+{\
+  self->r = r;\
+  self->l = l;\
+}\
 END_ACTION
+
+BINARY_OP(plus)
+    NUMERIC_TYPES (+)
+    EVAL_TYPE(G_TYPE_STRING)
+      const gchar *l, *r;
+      l = g_value_get_string (ret);
+      r = g_value_get_string (&temp);
+      g_value_set_string (ret, g_strconcat (l, r, NULL));
+    END_EVAL_TYPE
+END_BINARY_OP(plus)
+
+BINARY_OP(minus)
+  NUMERIC_TYPES (-)
+END_BINARY_OP(minus)
+
+BINARY_OP(mul)
+  NUMERIC_TYPES (*)
+END_BINARY_OP(mul)
+
+BINARY_OP(div)
+  NUMERIC_TYPES (-)
+END_BINARY_OP(div)
 
 /* if */
 
