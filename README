@@ -17,8 +17,10 @@ function returns a pointer to an object which implements a language contruct.
 
 - I just wrote it over the weekend for fun
 - No memory management at present
-- No data types or operations are possible at present
+- Dynamic implementation is probably inefficient
 - I am largely ignorant of how concurrency might affect this system
+- Possibly difficult to debug, and syntax erros are difficult to resolve due
+  to the heavy abuse of preprocessor macros.
 
     Potential Upsides
 
@@ -32,6 +34,9 @@ advantages of functional programming, goof might offer the following:
 - easy to add new constructs to the language
 - easy to inter-operate between C and goof
 - requires nothing other than a C compiler (after removing the glib code)
+- you potentially mix and match different semantics within the same executable
+  (e.g. applicative versus normal order, eager versus strict, allow
+  non-deterministic evaluation etc).
 
     Liscence
 
