@@ -21,9 +21,9 @@ struct _Action {
 #define DO_WITH(action, ret, vars) action->do_(action, ret, vars)
 
 Action *block (int dummy, ...);
-Action *print (Action *value);
+Action *print (Action *value, int dummy);
 Action *call (action_func func);
-Action *def (gchar *string, Action *value_expr);
+Action *def (gchar *string, Action *value_expr, int dummy);
 Action *val (gchar *string);
 Action *boolean (gboolean value);
 Action *integer (gint value);
@@ -34,22 +34,37 @@ Action *str (gchar *value);
 Action *object (GType type, ...);
 Action *function (int dummy, ...);
 Action *apply (Action *f, ...);
+Action *if_ (Action *cond, Action *t, Action *f, int dummy);
 
-Action *not (Action *f);
-Action *plus (Action *r, Action *l);
-Action *minus (Action *r, Action *l);
-Action *mul (Action *r, Action *l);
-Action *div (Action *r, Action *l);
+Action *not (Action *f, int dummy);
+Action *plus (Action *r, Action *l, int dummy);
+Action *minus (Action *r, Action *l, int dummy);
+Action *mul (Action *r, Action *l, int dummy);
+Action *div (Action *r, Action *l, int dummy);
 
 /* useful macros */
 
-#define BLOCK(...) block(0,  __VA_ARGS__, NULL)
-#define OBJ(...) object(__VA_ARGS__, NULL)
-#define DEF(name, value) def(#name, value)
-#define VAL(name) val(#name)
-#define _(...) str(#__VA_ARGS__)
-#define FUNCTION(...) function(0, __VA_ARGS__, NULL)
-#define APPLY(f, ...) apply(VAL(f), __VA_ARGS__, NULL)
+#define id(x) #x,
+#define BLOCK(...) block(0,  __VA_ARGS__ NULL),
+#define PRINT(arg) print(arg 0),
+#define CALL(arg) call(arg),
+#define DEF(...) def(__VA_ARGS__ 0),
+#define VAL(name) val(#name),
+#define BOOL(arg) boolean(arg),
+#define I(arg) integer(arg),
+#define R(arg) real(arg),
+#define I64(arg) big (arg),
+#define UI64(arg) ubig (arg),
+#define _(...) str(#__VA_ARGS__),
+#define OBJ(...) object(__VA_ARGS__ NULL),
+#define FUNCTION(...) function(0, __VA_ARGS__ NULL),
+#define APPLY(...) apply(__VA_ARGS__ NULL),
+#define NOT(...) not(__VA_ARGS__ 0),
+#define PLUS(...) plus(__VA_ARGS__ 0),
+#define MINUS(...) minus(__VA_ARGS__ 0),
+#define MUL(...) mul(__VA_ARGS__ 0),
+#define DIV(...) div(__VA_ARGS__ 0),
+#define IF(...) if_ (__VA_ARGS__ 0),
 
 #define BEGIN {\
     GValue ret = { 0 };\
@@ -60,7 +75,7 @@ Action *div (Action *r, Action *l);
     x = block(0, 
 
 #define END\
-    , NULL);\
+    NULL);\
     x->do_(x, &ret, vars);}
 
 #endif

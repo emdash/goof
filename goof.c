@@ -48,7 +48,7 @@ ACTION_IMPL(not)
   g_value_set_boolean (ret, ! g_value_get_boolean (ret));
 }
 
-ACTION_CONSTRUCTOR(not, Action *arg)
+ACTION_CONSTRUCTOR(not, Action *arg, int dummy)
 {
   self->arg = arg;
 }
@@ -109,7 +109,7 @@ ACTION_IMPL(name)\
 \
 
 #define END_BINARY_OP(name) }}\
-ACTION_CONSTRUCTOR(name, Action *l, Action *r)\
+ACTION_CONSTRUCTOR(name, Action *l, Action *r, int dummy)\
 {\
   self->r = r;\
   self->l = l;\
@@ -168,13 +168,13 @@ END_BINARY_OP(div)
 
 /* if */
 
-ACTION(IF,
+ACTION(if_,
   Action *condition;
   Action *positive;
   Action *negative;
 )
 
-ACTION_IMPL(IF)
+ACTION_IMPL(if_)
 {
   GValue cond = { 0 };
   GValue conv = { 0 };
@@ -193,7 +193,7 @@ ACTION_IMPL(IF)
   }
 }
 
-ACTION_CONSTRUCTOR(IF, Action *cond, Action *t, Action *f)
+ACTION_CONSTRUCTOR(if_, Action *cond, Action *t, Action *f, int dummy)
 {
   self->condition = cond;
   self->positive = t;
@@ -251,7 +251,7 @@ ACTION_IMPL(print) {
   g_printf ("%s\n", g_value_get_string (&string));
 }
 
-ACTION_CONSTRUCTOR(print, Action *a) 
+ACTION_CONSTRUCTOR(print, Action *a, int dummy) 
 {
   self->a = a;
 }
@@ -269,7 +269,7 @@ ACTION_IMPL(def) {
   frame_set_local (vars, self->name, ret);
 }
 
-ACTION_CONSTRUCTOR(def, gchar *name, Action *value_expr)
+ACTION_CONSTRUCTOR(def, gchar *name, Action *value_expr, int dummy)
 {
   self->name = name;
   self->expr = value_expr;

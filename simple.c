@@ -15,58 +15,58 @@ static gchar *static_string = "foo";
 
 int main (int argc, char **argv) {
   BEGIN
-      DEF (foo, boolean (TRUE)),
-      DEF (bar, _(blah)),
-      DEF (baz, FUNCTION ("x",
-            IF(VAL (x),
+      DEF (id(foo) BOOL (TRUE))
+      DEF (id(bar) _(blah))
+      DEF (id(baz) FUNCTION (id(x)
+            IF(VAL (x)
               BLOCK (
-                call (a_function),
-                print (VAL (bar)),
+                CALL (a_function)
+                PRINT (VAL (bar))
                 _(x is positive)
-              ),
+              )
               _(x is negative)
             )
         )
-      ),
+      )
 
-      print (plus (integer (3), integer(4))),
+//      PRINT (PLUS (I(3) I(4)))
 
-      DEF (+, FUNCTION ("x", "y",
-            plus (VAL(x), VAL(y)))),
+      DEF (id(+) FUNCTION (id(x) id(y)
+            PLUS (VAL(x) VAL(y))))
 
-      print (APPLY(+, _(abc), _(def))),
-      print (APPLY(+, integer (3), real (2.4))),
+      PRINT (APPLY(VAL(+) _(abc) _(def)))
+      PRINT (APPLY(VAL(+) I(3) R(2.4)))
 
-      print (mul(minus (integer (5), integer (3)), integer (4))),
-      print (mul(minus (integer (5), real (3)), integer (4))),
+      PRINT (MUL(MINUS (I(5) I(3)) I(4)))
+      PRINT (MUL(MINUS (I(5) R(3)) I(4)))
 
-      print (_(test negation)),
-      print (not (boolean (FALSE))),
+      PRINT (_(test negation))
+      PRINT (NOT (BOOL (FALSE)))
 
-      print (APPLY(baz, VAL(foo))),
-      print (APPLY(baz, boolean (FALSE))),
-      print (call (another_function)),
+      PRINT (APPLY(VAL(baz) VAL(foo)))
+      PRINT (APPLY(VAL(baz) BOOL (FALSE)))
+      PRINT (CALL (another_function))
 
       /* test closures */
 
-      DEF (outer, FUNCTION("x",
-        FUNCTION("ignored", VAL(x)))),
-      DEF (one_ret, APPLY(outer, _(1))),
+      DEF (id(outer) FUNCTION(id(x)
+        FUNCTION(id(ignored) VAL(x))))
+      DEF (id(one_ret) APPLY(VAL(outer) _(1)))
 
-      DEF (two_ret, APPLY(outer, _(2))),
-      print (APPLY (one_ret, _())),
-      print (APPLY (two_ret, _())),
+      DEF (id(two_ret) APPLY(VAL(outer) _(2)))
+      PRINT (APPLY (VAL(one_ret) _()))
+      PRINT (APPLY (VAL(two_ret) _()))
 
       /* do something recursive */
-      print (_(\ncounting backward from 5\n)),
+      PRINT (_(\ncounting backward from 5\n))
 
-      DEF (count_backward, FUNCTION("x",
-            IF(not(VAL(x)),
-                print (_(done)),
+      DEF (id(count_backward) FUNCTION(id(x)
+            IF(NOT(VAL(x))
+                PRINT (_(done))
                 BLOCK(
-                  print (VAL(x)),
-                  APPLY(count_backward, minus(VAL(x), integer(1))))))),
+                  PRINT (VAL(x))
+                  APPLY(VAL(count_backward) MINUS(VAL(x) I(1)))))))
 
-      APPLY(count_backward, integer(5))
+      APPLY(VAL(count_backward) I(5))
   END
 }
