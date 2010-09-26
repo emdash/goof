@@ -56,11 +56,6 @@ END_ACTION
 
 /* binary operators */
 
-ACTION(plus,
-    Action *l;
-    Action *r;
-)
-
 static promote (GType l, GType r) {
 
   if ((l == G_TYPE_DOUBLE) || (r == G_TYPE_DOUBLE))
@@ -80,6 +75,26 @@ static promote (GType l, GType r) {
 
   return G_TYPE_INVALID;
 }
+
+#define INFIX_OP(gtype, particle, operator) \
+  case gtype:\
+    (g_value_set_##particle (ret, \
+        g_value_get_##particle (ret) \
+          operator g_value_get_##particle (&temp)));\
+   break
+
+#define FUNCTION_OP(gtype, particle, operator) \
+  case gtype:\
+    (g_value_set_##particle (ret, \
+        operator (g_value_get_##particle (ret),\
+          g_value_get_##particle (&temp))));\
+   break
+
+
+ACTION(plus,
+    Action *l;
+    Action *r;
+)
 
 ACTION_IMPL(plus)
 {
@@ -104,27 +119,11 @@ ACTION_IMPL(plus)
   g_value_transform (&r, &temp);
 
   switch (t) {
-    case G_TYPE_INT:
-      g_value_set_int (ret, 
-          g_value_get_int (ret) + g_value_get_int (&temp));
-      break;
-    case G_TYPE_DOUBLE:
-      g_value_set_double (ret, 
-          g_value_get_double (ret) + g_value_get_double (&temp));
-      break;
-    case G_TYPE_UINT64:
-      g_value_set_uint64 (ret, 
-          g_value_get_uint64 (ret) + g_value_get_uint64 (&temp));
-      break;
-    case G_TYPE_INT64:
-      g_value_set_int64 (ret, 
-          g_value_get_int64 (ret) + g_value_get_int64 (&temp));
-      break;
-    case G_TYPE_STRING:
-      g_value_set_string (ret,
-          g_strdup_printf ("%s%s", g_value_get_string (ret),
-            g_value_get_string (&temp)));
-      break;
+    INFIX_OP(G_TYPE_INT, int, +);
+    INFIX_OP(G_TYPE_DOUBLE, double, +);
+    INFIX_OP(G_TYPE_UINT64, uint64, +);
+    INFIX_OP(G_TYPE_INT64, int64, +);
+    FUNCTION_OP(G_TYPE_STRING, string, g_strconcat);
   };
 }
 
