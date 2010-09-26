@@ -81,14 +81,23 @@ static promote (GType l, GType r) {
     (g_value_set_##particle (ret, \
         g_value_get_##particle (ret) \
           operator g_value_get_##particle (&temp)));\
-   break
+   break;
 
-#define FUNCTION_OP(gtype, particle, operator) \
-  case gtype:\
-    (g_value_set_##particle (ret, \
-        operator (g_value_get_##particle (ret),\
-          g_value_get_##particle (&temp))));\
-   break
+#define OP(gtype) \
+  case gtype: {\
+
+#define ENDOP\
+  }\
+  break;
+
+#define OP_INTERNAL(operator, ...)\
+  switch (t) {\
+    INFIX_OP(G_TYPE_INT, int, operator)\
+    INFIX_OP(G_TYPE_DOUBLE, double, operator)\
+    INFIX_OP(G_TYPE_UINT64, uint64, operator)\
+    INFIX_OP(G_TYPE_INT64, int64, operator)\
+    __VA_ARGS__\
+  };
 
 
 ACTION(plus,
@@ -118,13 +127,14 @@ ACTION_IMPL(plus)
   g_value_transform (&l, ret);
   g_value_transform (&r, &temp);
 
-  switch (t) {
-    INFIX_OP(G_TYPE_INT, int, +);
-    INFIX_OP(G_TYPE_DOUBLE, double, +);
-    INFIX_OP(G_TYPE_UINT64, uint64, +);
-    INFIX_OP(G_TYPE_INT64, int64, +);
-    FUNCTION_OP(G_TYPE_STRING, string, g_strconcat);
-  };
+  OP_INTERNAL (+,
+      OP(G_TYPE_STRING)
+        const gchar *l, *r;
+        l = g_value_get_string (ret);
+        r = g_value_get_string (&temp);
+        g_value_set_string (ret, g_strconcat (l, r, NULL));
+      ENDOP
+  )
 }
 
 ACTION_CONSTRUCTOR(plus, Action *l, Action *r)
