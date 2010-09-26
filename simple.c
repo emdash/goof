@@ -58,6 +58,7 @@ int main (int argc, char **argv) {
       print (APPLY (two_ret, _())),
 
       /* do something recursive */
+      print (_(\ncounting backward from 5\n)),
 
       DEF (count_backward, FUNCTION("x",
             IF(not(VAL(x)),
