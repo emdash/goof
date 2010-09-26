@@ -37,6 +37,9 @@ Action *apply (Action *f, ...);
 
 Action *not (Action *f);
 Action *plus (Action *r, Action *l);
+Action *minus (Action *r, Action *l);
+Action *mul (Action *r, Action *l);
+Action *div (Action *r, Action *l);
 
 /* useful macros */
 

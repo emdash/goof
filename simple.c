@@ -37,6 +37,9 @@ int main (int argc, char **argv) {
       print (APPLY(+, _(abc), _(def))),
       print (APPLY(+, integer (3), real (2.4))),
 
+      print (mul(minus (integer (5), integer (3)), integer (4))),
+      print (mul(minus (integer (5), real (3)), integer (4))),
+
       print (_(test negation)),
       print (not (boolean (FALSE))),
 
@@ -52,6 +55,17 @@ int main (int argc, char **argv) {
 
       DEF (two_ret, APPLY(outer, _(2))),
       print (APPLY (one_ret, _())),
-      print (APPLY (two_ret, _()))
+      print (APPLY (two_ret, _())),
+
+      /* do something recursive */
+
+      DEF (count_backward, FUNCTION("x",
+            IF(not(VAL(x)),
+                print (_(done)),
+                BLOCK(
+                  print (VAL(x)),
+                  APPLY(count_backward, minus(VAL(x), integer(1))))))),
+
+      APPLY(count_backward, integer(5))
   END
 }

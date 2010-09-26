@@ -56,25 +56,6 @@ END_ACTION
 
 /* binary operators */
 
-static promote (GType l, GType r) {
-
-  if ((l == G_TYPE_DOUBLE) || (r == G_TYPE_DOUBLE))
-    return G_TYPE_DOUBLE;
-
-  if ((l == G_TYPE_INT64) || (r == G_TYPE_INT64))
-    return G_TYPE_INT64;
-
-  if ((l == G_TYPE_UINT64) || (r == G_TYPE_UINT64))
-    return G_TYPE_UINT64;
-
-  if ((l == G_TYPE_INT) && (r == G_TYPE_INT))
-    return G_TYPE_INT;
-
-  if ((l == G_TYPE_STRING) && (r == G_TYPE_STRING))
-    return G_TYPE_STRING;
-
-  return G_TYPE_INVALID;
-}
 
 #define INFIX_OP(gtype, particle, operator) \
   case gtype:\
@@ -135,7 +116,35 @@ ACTION_CONSTRUCTOR(name, Action *l, Action *r)\
 }\
 END_ACTION
 
-BINARY_OP(plus)
+static promote_arithmetic (GType l, GType r) {
+
+  if ((l == G_TYPE_DOUBLE) || (r == G_TYPE_DOUBLE))
+    return G_TYPE_DOUBLE;
+
+  if ((l == G_TYPE_INT64) || (r == G_TYPE_INT64))
+    return G_TYPE_INT64;
+
+  if ((l == G_TYPE_UINT64) || (r == G_TYPE_UINT64))
+    return G_TYPE_UINT64;
+
+  if ((l == G_TYPE_INT) && (r == G_TYPE_INT))
+    return G_TYPE_INT;
+}
+
+static promote_addition (GType l, GType r) {
+
+  GType a;
+
+  if ((a = promote_arithmetic (l, r)) != G_TYPE_INVALID)
+    return a;
+
+  if ((l == G_TYPE_STRING) && (r == G_TYPE_STRING))
+    return G_TYPE_STRING;
+
+  return G_TYPE_INVALID;
+}
+
+BINARY_OP(plus, promote_addition)
     NUMERIC_TYPES (+)
     EVAL_TYPE(G_TYPE_STRING)
       const gchar *l, *r;
@@ -145,16 +154,16 @@ BINARY_OP(plus)
     END_EVAL_TYPE
 END_BINARY_OP(plus)
 
-BINARY_OP(minus)
+BINARY_OP(minus, promote_arithmetic)
   NUMERIC_TYPES (-)
 END_BINARY_OP(minus)
 
-BINARY_OP(mul)
+BINARY_OP(mul, promote_arithmetic)
   NUMERIC_TYPES (*)
 END_BINARY_OP(mul)
 
-BINARY_OP(div)
-  NUMERIC_TYPES (-)
+BINARY_OP(div, promote_arithmetic)
+  NUMERIC_TYPES (/)
 END_BINARY_OP(div)
 
 /* if */
